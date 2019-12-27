@@ -263,19 +263,22 @@ def get_links_for_tag(browser,
     )
     top_posts = top_elements.find_elements_by_tag_name('a')
 
+    print("[ARO] like_util.py get_links_for_tag 266 - posts:")
     for post in top_posts:
-        print("[ARO] like_util.py get_links_for_tag 267 - post: {}".format(post))
+        print("[ARO] \tpost: {} == {}".format(post.__str__(), dir(post)))
 
-    print("[ARO] like_util.py get_links_for_tag 266 -- sleep 1")
+    print("[ARO] like_util.py get_links_for_tag -- sleep 1")
     sleep(1)
 
     if skip_top_posts:
-        print("[ARO] like_util.py get_links_for_tag 268 -- skipping top posts")
+        print("[ARO] like_util.py get_links_for_tag -- skipping top posts")
+        # ++++++++++++++ GET ORDINARY POSTS HTML BASE TO GET LINKS FROM THAT LATER ++++++++++++++
         main_elem = browser.find_element_by_xpath(
             read_xpath(get_links_for_tag.__name__, "main_elem")
         )
     else:
         main_elem = browser.find_element_by_tag_name('main')
+
     link_elems = main_elem.find_elements_by_tag_name('a')
     sleep(1)
 
@@ -294,12 +297,11 @@ def get_links_for_tag(browser,
 
     except WebDriverException:
         try:
-            # [ARO] ordinary posts
+            # [ARO] possible posts - count of all posts in this #
             possible_posts = (browser.find_element_by_xpath(
                 read_xpath(get_links_for_tag.__name__,"possible_post")).text)
             if possible_posts:
                 possible_posts = format_number(possible_posts)
-
             else:
                 logger.info(
                     "Failed to get the amount of possible posts in '{}' tag  "
@@ -328,12 +330,13 @@ def get_links_for_tag(browser,
     # written there, it may be cos of some posts is deleted but still keeps
     # counted for the tag
 
+    # ++++++++++++++ GET TAGS POST LINKS ++++++++++++++
     # Get links
     links = get_links(browser, tag, logger, media, main_elem)
     filtered_links = len(links)
     try_again = 0
     sc_rolled = 0
-    nap = 1.5
+    nap = 3
     put_sleep = 0
     try:
         while filtered_links in range(1, amount):
@@ -360,6 +363,7 @@ def get_links_for_tag(browser,
             links = []
             for i in links_all:
                 if i not in s:
+                    print("[ARO] like_util.py adding link to list: {}".format(i))
                     s.add(i)
                     links.append(i)
 
@@ -403,10 +407,13 @@ def get_links_for_tag(browser,
 
     sleep(4)
 
-    if randomize is True:
-        random.shuffle(links)
+    if skip_top_posts:
+        resultLinks = links[9:]
 
-    return links[:amount]
+    if randomize is True:
+        random.shuffle(resultLinks)
+
+    return resultLinks[:amount]
 
 
 def get_links_for_username(browser,
@@ -722,6 +729,7 @@ def like_image(browser, username, blacklist, logger, logfolder, total_liked_img)
         # sleep real quick right before clicking the element
         print("[ARO] like_util.py 717 b4 like, call sleep for: {}".format(2))
         sleep(2)
+        print("[ARO] like_util.py like_elem[0]: {}".format(like_elem[0]))
         click_element(browser, like_elem[0])
         # check now we have unlike instead of like
         liked_elem = browser.find_elements_by_xpath(unlike_xpath)
@@ -749,7 +757,7 @@ def like_image(browser, username, blacklist, logger, logfolder, total_liked_img)
         else:
             # if like not seceded wait for 2 min
             logger.info('--> Image was not able to get Liked! maybe blocked ? Sleep 120')
-            sleep(120)
+            sleep(12)
 
     else:
         liked_elem = browser.find_elements_by_xpath(unlike_xpath)

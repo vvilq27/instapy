@@ -59,8 +59,8 @@ from .util import save_account_progress
 # from .unfollow_util import get_given_user_following
 # from .unfollow_util import unfollow
 # from .unfollow_util import unfollow_user
-# from .unfollow_util import follow_user
-# from .unfollow_util import follow_restriction
+from .unfollow_util import follow_user
+from .unfollow_util import follow_restriction
 # from .unfollow_util import dump_follow_restriction
 # from .unfollow_util import set_automated_followed_pool
 # from .unfollow_util import get_follow_requests
@@ -432,24 +432,25 @@ class InstaPy:
                         "login",
                         "info",
                         self.logger)
+        # [ARO] disabled getting profile data
         # try to save account progress
-        try:
-            save_account_progress(self.browser,
-                                  self.username,
-                                  self.logger)
-        except Exception:
-            self.logger.warning(
-                'Unable to save account progress, skipping data update')
-
-        # logs only followers/following numbers when able to login,
-        # to speed up the login process and avoid loading profile
-        # page (meaning less server calls)
-        self.followed_by = log_follower_num(self.browser,
-                                            self.username,
-                                            self.logfolder)
-        self.following_num = log_following_num(self.browser,
-                                               self.username,
-                                               self.logfolder)
+        # try:
+        #     save_account_progress(self.browser,
+        #                           self.username,
+        #                           self.logger)
+        # except Exception:
+        #     self.logger.warning(
+        #         'Unable to save account progress, skipping data update')
+        #
+        # # logs only followers/following numbers when able to login,
+        # # to speed up the login process and avoid loading profile
+        # # page (meaning less server calls)
+        # self.followed_by = log_follower_num(self.browser,
+        #                                     self.username,
+        #                                     self.logfolder)
+        # self.following_num = log_following_num(self.browser,
+        #                                        self.username,
+        #                                        self.logfolder)
 
         return self
 
@@ -1787,6 +1788,8 @@ class InstaPy:
                                           randomize,
                                           media,
                                           self.logger)
+
+
             except NoSuchElementException:
                 self.logger.info('Too few images, skipping this tag')
                 continue
@@ -1963,6 +1966,8 @@ class InstaPy:
                 except NoSuchElementException as err:
                     self.logger.error('Invalid Page: {}'.format(err))
 
+            self.logger.info('[ARO] lets make some delay betweed tags, sleep 120...')
+            sleep(120)
             self.logger.info('Tag: {}'.format(tag.encode('utf-8')))
 
         self.logger.info('Liked: {}'.format(liked_img))
